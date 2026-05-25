@@ -31,7 +31,10 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl, postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+    if (
+      allowedOrigins.indexOf(origin) !== -1 || 
+      origin.startsWith('http://localhost:')
+    ) {
       return callback(null, true);
     }
     return callback(new Error('CORS Policy block: Origin not allowed'), false);
@@ -56,10 +59,18 @@ connectDB().then(() => {
   seedDatabase();
 });
 
-// Setup Socket.IO Server
 const io = socketIo(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.indexOf(origin) !== -1 || 
+        origin.startsWith('http://localhost:')
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error('CORS Policy block: Origin not allowed'), false);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   }
